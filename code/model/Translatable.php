@@ -1148,6 +1148,19 @@ class Translatable extends DataExtension implements PermissionProvider {
 	}
 
 	/**
+	 * KBHACK by Herbert
+	 * we need to add custom translatableFields for ProductAttributes that uses bogus datafield names for attributes
+	 *
+	 * @return array
+	 */
+	function updateTranslatableFields($fields) {
+		$this->translatableFields=array_merge(
+				$this->translatableFields,
+				$fields
+		);
+	}
+
+	/**
 	 * This method can be called multiple times on the same FieldList
 	 * because it checks which fields have already been added or modified.
 	 */
@@ -1192,6 +1205,15 @@ class Translatable extends DataExtension implements PermissionProvider {
 			
 			$translatableFieldNames = $this->getTranslatableFields();
 			$allDataFields = $fields->dataFields();
+			/* @kbhack - bug for showing uploadfields in other languages - Herbert */
+			foreach($allDataFields as $key=>$dataField){
+				if($dataField->class=="UploadField"){
+					$translatableFieldNames[]=$key;
+					if(($arrNo = array_search($key."ID", $translatableFieldNames)) !== false) {
+						unset($translatableFieldNames[$arrNo]);
+					}
+				}
+			}
 			
 			$transformation = new Translatable_Transformation($originalRecord);
 			
